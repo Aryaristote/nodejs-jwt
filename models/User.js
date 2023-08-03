@@ -24,6 +24,19 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
+userSchema.statics.login = async function (email, password){
+    const user = await this.findOne({ email: email });
+    if(user){
+        //Compare input password & hashed password from DB
+        const auth = await bcrypt.compare(password, user.password)
+        if(auth){
+            return user;
+        }
+        throw Error("Incorrect Password");
+    }
+    throw Error("Incorrect Email")
+}
+
 //Fire a function after Document saved into the DB (Can't access Doc)
 // userSchema.post('save', function (doc, next) {})
 
