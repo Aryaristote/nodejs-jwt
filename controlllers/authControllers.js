@@ -47,6 +47,7 @@ const createToken = (id) => {
 // controller actions
 module.exports.signup_get = (req, res) => {
   res.render('signup');
+  // res.status(200).json("GET | Sign in success");
 }
 
 module.exports.login_get = (req, res) => {
@@ -60,7 +61,7 @@ module.exports.signup_post = async (req, res) => {
     const user = await User.create({ email, password });
     const token = createToken(user._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(201).json({ user: user._id });
+    res.status(201).json("POST | Sign uo success");
   }
   catch(err) {
     const errors = handleErrors(err);
@@ -75,7 +76,7 @@ module.exports.login_post = async (req, res) => {
     const user = await User.login(email, password);
     const token = createToken(user._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ user: user._id });
+    res.status(200).json("POST | Log in success");
   } catch (err) {
     const errors = handleErrors(err)
     res.status(400).json({ errors });
@@ -86,5 +87,6 @@ module.exports.login_post = async (req, res) => {
 //Log out
 module.exports.logout_get = (req, res) => {
     res.cookie('jwt', '', { maxAge: 1 });
-    res.redirect('/')
+    // res.redirect('/')
+    res.status(201).json("POST | Log out success")
 }
