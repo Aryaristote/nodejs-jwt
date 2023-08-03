@@ -1,12 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/authRoutes')
+const cookiesParser = require('cookie-parser')
 
 const app = express();
 
 // middleware
 app.use(express.static('public'));
 app.use(express.json());
+app.use(cookiesParser())
 
 // view engine
 app.set('view engine', 'ejs'); 
