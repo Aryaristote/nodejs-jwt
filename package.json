@@ -12,6 +12,7 @@
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^5.9.23",
     "nodemon": "^3.0.1",
+    "passport": "^0.6.0",
     "validator": "^13.9.0"
   },
   "scripts": {
