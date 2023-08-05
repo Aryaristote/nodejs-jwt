@@ -2,9 +2,23 @@
 
 <form action="/signup">
   <h2>Sign up</h2>
+  <label for="name">Name</label>
+  <input type="text" name="name" required />
+  <div class="name error"></div>
+
   <label for="email">Email</label>
   <input type="email" name="email" required />
   <div class="email error"></div>
+
+  <div>
+    <label for="countryCode">Country Code / Phone Number</label>
+    <input type="text" name="countryCode" required />
+    <div class="countryCode error"></div>
+
+    <input type="number" name="phoneNumber" required />
+    <div class="phoneNumber error"></div>
+  </div>
+
   <label for="password">Password</label>
   <input type="password" name="password" required />
   <div class="password error"></div>
@@ -15,40 +29,50 @@
 
 <script>
   const form = document.querySelector('form');
+  const nameError = document.querySelector('.name.error');
   const emailError = document.querySelector('.email.error');
+  const countryCodeError = document.querySelector('.countryCode.error');
+  const phoneNumberError = document.querySelector('.phoneNumber.error');
   const passwordError = document.querySelector('.password.error');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     // reset errors
+    nameError.textContent = '';
     emailError.textContent = '';
+    countryCodeError.textContent = '';
+    phoneNumberError.textContent = '';
     passwordError.textContent = '';
 
     // get values
+    const name = form.name.value;
     const email = form.email.value;
+    const countryCode = form.countryCode.value;
+    const phoneNumber = form.phoneNumber.value;
     const password = form.password.value;
 
     try {
       const res = await fetch('/signup', { 
         method: 'POST', 
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, countryCode, phoneNumber, password }),
         headers: {'Content-Type': 'application/json'}
       });
       const data = await res.json();
       console.log(data);
       if (data.errors) {
+        nameError.textContent = data.errors.name;
         emailError.textContent = data.errors.email;
+        countryCodeError.textContent = data.errors.countryCode
+        phoneNumberError.textContent = data.errors.phoneNumber
         passwordError.textContent = data.errors.password;
       }
       if (data.user) {
         location.assign('/');
       }
-
     }
     catch (err) {
       console.log(err);
     }
-
   });
 </script>

@@ -6,15 +6,15 @@ const handleErrors = (err) => {
   console.log(err.message, err.code);
   let errors = { email: '', password: '' };
 
-  //Incorrect email
-  if(err.message === "Incorrect Email"){
-    errors.email = "This email is not registered";
+  // incorrect email
+  if (err.message === 'incorrect email') {
+    errors.email = 'That email is not registered';
   }
 
-   //Incorrect password
-   if(err.message === "Incorrect Password"){
-    errors.password = "The password does not match";
-   }
+  // incorrect password
+  if (err.message === 'incorrect password') {
+    errors.password = 'That password is incorrect';
+  }
 
   // duplicate email error
   if (err.code === 11000) {
@@ -37,7 +37,6 @@ const handleErrors = (err) => {
 
 // create json web token
 const maxAge = 3 * 24 * 60 * 60;
-//store user data in token as payload ID
 const createToken = (id) => {
   return jwt.sign({ id }, 'net ninja secret', {
     expiresIn: maxAge
@@ -54,18 +53,20 @@ module.exports.login_get = (req, res) => {
 }
 
 module.exports.signup_post = async (req, res) => {
-  const { email, password } = req.body;
+  const { name, email, countryCode, phoneNumber, password } = req.body;
 
   try {
-    const user = await User.create({ email, password });
+    const user = await User.create({ name, email, countryCode, phoneNumber, password });
     const token = createToken(user._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
     res.status(201).json({ user: user._id });
+    // console.log(user)
   }
   catch(err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
   }
+ 
 }
 
 module.exports.login_post = async (req, res) => {
@@ -76,15 +77,15 @@ module.exports.login_post = async (req, res) => {
     const token = createToken(user._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
     res.status(200).json({ user: user._id });
-  } catch (err) {
-    const errors = handleErrors(err)
+  } 
+  catch (err) {
+    const errors = handleErrors(err);
     res.status(400).json({ errors });
   }
 
 }
 
-//Log out
 module.exports.logout_get = (req, res) => {
-    res.cookie('jwt', '', { maxAge: 1 });
-    res.redirect('/')
+  res.cookie('jwt', '', { maxAge: 1 });
+  res.redirect('/');
 }

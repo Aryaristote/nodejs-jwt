@@ -1,46 +1,58 @@
 const mongoose = require('mongoose');
-const { isEMail } = require('validator');
+const { isEmail } = require('validator');
 const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: [true, 'Please enter your name'],
+        minlength: [3, 'Minimum characters must 4'],
+    },
     email: {
         type: String,
-        required: [true, 'Please enter an Email'],
+        required: [true, 'Please enter an email'],
         unique: true,
         lowercase: true,
-        validation: [isEMail, 'Please enter a valid Email']
+        validate: [isEmail, 'Please enter a valid email']
+    },
+    countryCode: {
+        type: String,
+        required: true,
+        match: /^\+\d{1,4}$/, // Country code format: starts with "+" followed by 1 to 4 digits
+    },
+    phoneNumber: {
+        type: String,
+        required: true,
+        match: /^\d{8,10}$/, // Phone number format: 8 to 15 digits
     },
     password: {
         type: String,
-        required: [true, 'Please enter a Password'],
-        minlength: [6, 'Minimum Password length is 6 characters'],
+        required: [true, 'Please enter a password'],
+        minlength: [6, 'Minimum password length is 6 characters'],
     }
-})
-
-// Fire a function before Document saved into the DB
-userSchema.pre('save', async function (next) {
-    const salt = await bcrypt.genSalt();
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
 });
 
-userSchema.statics.login = async function (email, password){
-    const user = await this.findOne({ email: email });
-    if(user){
-        //Compare input password & hashed password from DB
-        const auth = await bcrypt.compare(password, user.password)
-        if(auth){
-            return user;
-        }
-        throw Error("Incorrect Password");
+
+// fire a function before doc saved to db
+userSchema.pre('save', async function(next) {
+  const salt = await bcrypt.genSalt();
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// static method to login user
+userSchema.statics.login = async function(email, password) {
+  const user = await this.findOne({ email });
+  if (user) {
+    const auth = await bcrypt.compare(password, user.password);
+    if (auth) {
+      return user;
     }
-    throw Error("Incorrect Email")
-}
+    throw Error('incorrect password');
+  }
+  throw Error('incorrect email');
+};
 
-//Fire a function after Document saved into the DB (Can't access Doc)
-// userSchema.post('save', function (doc, next) {})
-
-//Saving data in DB
 const User = mongoose.model('user', userSchema);
 
 module.exports = User;
