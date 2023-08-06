@@ -10,7 +10,7 @@ require('./auth')
 const passport = require('passport');
 
 const app = express();
-app.use(session({ secret: 'bolingo kindura', resave: false, saveUninitialized: true, }));
+app.use(session({ secret: 'Bolingo@defaultpass', resave: false, saveUninitialized: true, }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -28,25 +28,16 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCr
   .then((result) => app.listen(3000))
   .catch((err) => console.log(err));
 
-//Google auth routes _______________________________________
-const isLoggedIn = (req, res, next) => {
-  req.user ? next() : res.sendStatus(401);
-}
-
 app.get('/auth/google', passport.authenticate('google', { scope:['profile', 'email']}));
 app.get('/google/callback',
   passport.authenticate('google', {
     successRedirect: '/smoothies',
-    failureRedirect: 'auth/failure',
+    failureRedirect: '/signup',
   })
 );
 app.get('/auth/failure', (req, res) => {
   res.send("Something went wrong ...")
 });
-app.get('/protected', isLoggedIn, (req, res) => {
-  res.render('smoothies')
-});
-
 
 // routes
 app.get('*', checkUser) //Apply this middleware to all get routes
@@ -57,9 +48,8 @@ app.use(authRoutes)
 
 //Logout
 app.get('/logout', (req, res) => {
-  // req.logout();
-  // req.session.destroy();
-  res.cookie('kinduraCK', '', { maxAge: 1 });
+  res.cookie('fAuth', '', { maxAge: 1 });
+  res.cookie('authG', '', { maxAge: 1 });
   res.redirect('/');
 })
 

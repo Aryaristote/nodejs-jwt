@@ -1,5 +1,6 @@
 const User = require("../models/User");
-const kinduraCK = require('jsonwebtoken');
+const fAuth = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 // handle errors
 const handleErrors = (err) => {
@@ -26,8 +27,6 @@ const handleErrors = (err) => {
   if (err.message.includes('user validation failed')) {
     // console.log(err);
     Object.values(err.errors).forEach(({ properties }) => {
-      // console.log(val);
-      // console.log(properties);
       errors[properties.path] = properties.message;
     });
   }
@@ -36,10 +35,9 @@ const handleErrors = (err) => {
 }
 
 // create json web token
-const maxAge = 3 * 24 * 60 * 60;
 const createToken = (id) => {
-  return kinduraCK.sign({ id }, 'bolingo kindura', {
-    expiresIn: maxAge
+  return fAuth.sign({ id }, 'Bolingo@defaultpass', {
+    expiresIn: 31536000000
   });
 };
 
@@ -58,34 +56,41 @@ module.exports.signup_post = async (req, res) => {
   try {
     const user = await User.create({ name, email, countryCode, phoneNumber, password });
     const token = createToken(user._id);
-    res.cookie('kinduraCK', token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.cookie('fAuth', token, { httpOnly: true, maxAge: 31536000000 });
     res.status(201).json({ user: user._id });
-    // console.log(user)
   }
   catch(err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
   }
- 
 }
 
 module.exports.login_post = async (req, res) => {
-  const { email, password } = req.body;
+  const { emailOrPhone, password } = req.body;
 
   try {
-    const user = await User.login(email, password);
+    // Check if the user exists based on email or phone number
+    const user = await User.findOne({
+      $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
+    });
+
+    if (!user) {
+      console.log('User not found');
+    }
+
+    // Compare the provided password with the stored hashed password
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordMatch) {
+      console.log('Invalid credentials');
+    }
+
+    // Successful login
     const token = createToken(user._id);
-    res.cookie('kinduraCK', token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.cookie('fAuth', token, { httpOnly: true, maxAge: 31536000000 });
     res.status(200).json({ user: user._id });
-  } 
-  catch (err) {
+  } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
   }
-
 }
-
-// module.exports.logout_get = (req, res) => {
-//   res.cookie('kinduraCK', '', { maxAge: 1 });
-//   res.redirect('/');
-// }

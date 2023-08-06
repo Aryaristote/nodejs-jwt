@@ -17,17 +17,14 @@ const userSchema = new mongoose.Schema({
     },
     countryCode: {
         type: String,
-        required: true,
         match: /^\+\d{1,4}$/, // Country code format: starts with "+" followed by 1 to 4 digits
     },
     phoneNumber: {
         type: String,
-        required: true,
         match: /^\d{8,10}$/, // Phone number format: 8 to 15 digits
     },
     password: {
         type: String,
-        required: [true, 'Please enter a password'],
         minlength: [6, 'Minimum password length is 6 characters'],
     }
 });
@@ -42,15 +39,17 @@ userSchema.pre('save', async function(next) {
 
 // static method to login user
 userSchema.statics.login = async function(email, password) {
-  const user = await this.findOne({ email });
-  if (user) {
-    const auth = await bcrypt.compare(password, user.password);
-    if (auth) {
-      return user;
+  userSchema.statics.login = async function(email, password) {
+    const user = await this.findOne({ email });
+    if (user) {
+      const auth = await bcrypt.compare(password, user.password);
+      if (auth) {
+        return user;
+      }
+      throw Error('incorrect password');
     }
-    throw Error('incorrect password');
-  }
-  throw Error('incorrect email');
+    throw Error('incorrect email');
+  };
 };
 
 const User = mongoose.model('user', userSchema);
