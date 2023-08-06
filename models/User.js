@@ -17,15 +17,20 @@ const userSchema = new mongoose.Schema({
     },
     countryCode: {
         type: String,
-        match: /^\+\d{1,4}$/, // Country code format: starts with "+" followed by 1 to 4 digits
+        match: /^\+\d{1,4}$/,
     },
     phoneNumber: {
         type: String,
-        match: /^\d{8,10}$/, // Phone number format: 8 to 15 digits
+        unique: true,
+        match: /^\d{8,10}$/,
     },
     password: {
         type: String,
         minlength: [6, 'Minimum password length is 6 characters'],
+    },
+    varified: {
+      type: String,
+      default: false,
     }
 });
 
