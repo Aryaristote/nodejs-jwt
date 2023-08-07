@@ -1,9 +1,10 @@
 require('dotenv').config();
 const User = require("../models/User");
+const Token = require('../models/Token')
 const nodemailer = require('nodemailer');
 const fAuth = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto'); 
+const crypto = require('crypto');
 
 // handle errors
 const handleErrors = (err) => {
@@ -54,6 +55,22 @@ module.exports.signup_get = (req, res) => {
 module.exports.login_get = (req, res) => {
   res.render('login');
 }
+
+//Email account activation
+module.exports.emailActivation_get = async (req, res) => {
+  try{
+    const token = await Token.findOne({
+      token:req.params.token,
+    });
+    console.log(token);
+    await User.updateOne({_id:token.userId},{$set:{verified:true}});
+    await Token.findByIdAndRemove(token._id);
+    res.send("Email activate");
+  }catch(err){
+    res.status(400).send("An error occured");
+  }
+}
+
 // Create a transporter for sending emails
 const transporter = nodemailer.createTransport({
   host: 'localhost',
@@ -70,6 +87,7 @@ module.exports.signup_post = async (req, res) => {
 
     //Store in Database
     const user = await User.create({ name, email, countryCode, phoneNumber, password });
+    const token = await Token.create({ userId: user._id, token: verificationToken });
 
     // Send the verification email
     const verificationLink = `http://localhost:3000/verify?token=${verificationToken}`;
@@ -77,7 +95,7 @@ module.exports.signup_post = async (req, res) => {
       from: 'aryaristote@gmail.com',
       to: email,
       subject: 'Account Verification',
-      text: `Click the link below to verify your account:\n${verificationLink}`,
+      text: `Click the link below to verify your account: \n${verificationLink}`,
     };
     await transporter.sendMail(mailOptions);
     res.status(200).json({ message: 'User created successfully' });
@@ -99,6 +117,7 @@ module.exports.login_post = async (req, res) => {
 
     if (!user) {
       console.log('User not found');
+      return;
     }
 
     // Compare the provided password with the stored hashed password
@@ -106,9 +125,18 @@ module.exports.login_post = async (req, res) => {
 
     if (!isPasswordMatch) {
       console.log('Invalid credentials');
+      return;
+    }
+
+    // Check if the user is verified
+    if (user.verified == false) {
+      console.log('User is not verified');
+      res.status(401).json({ error: 'User is not verified' });
+      return;
     }
 
     // Successful login
+    console.log('User connected');
     const token = createToken(user._id);
     res.cookie('fAuth', token, { httpOnly: true, maxAge: 31536000000 });
     res.status(200).json({ user: user._id });
@@ -116,4 +144,4 @@ module.exports.login_post = async (req, res) => {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
   }
-}
+};
