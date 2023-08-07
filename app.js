@@ -4,6 +4,8 @@ const authRoutes = require('./routes/authRoutes')
 const cookiesParser = require('cookie-parser')
 const { requireAuth, checkUser } = require('./middleware/authMiddleware')
 const session = require('express-session');
+const Token = require('./models/Token')
+const User = require('./models/User')
 
 //OTP Auth
 require('./auth')

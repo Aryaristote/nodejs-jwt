@@ -62,12 +62,16 @@ module.exports.emailActivation_get = async (req, res) => {
     const token = await Token.findOne({
       token:req.params.token,
     });
-    console.log(token);
-    await User.updateOne({_id:token.userId},{$set:{verified:true}});
+    if (!token) {
+      return res.status(404).send("Token not found");
+    }
+    await User.updateOne({ _id: token.userId }, { $set: { verified: true } });
     await Token.findByIdAndRemove(token._id);
-    res.send("Email activate");
-  }catch(err){
-    res.status(400).send("An error occured");
+    // console.log("love in aur")
+
+    res.send("Email activated");
+  } catch (err) {
+    res.status(400).send("An error occurred");
   }
 }
 
@@ -90,7 +94,7 @@ module.exports.signup_post = async (req, res) => {
     const token = await Token.create({ userId: user._id, token: verificationToken });
 
     // Send the verification email
-    const verificationLink = `http://localhost:3000/verify?token=${verificationToken}`;
+    const verificationLink = `http://localhost:3000/confirm/${verificationToken}`;
     const mailOptions = {
       from: 'aryaristote@gmail.com',
       to: email,
