@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     name: {
       type: String,
       required: [true, 'Please enter your name'],
-      minlength: [3, 'Minimum characters must 4'],
+      minlength: [4, 'Name should be at least 4 characters long'],
     },
     email: {
         type: String,
@@ -18,15 +18,18 @@ const userSchema = new mongoose.Schema({
     countryCode: {
         type: String,
         match: /^\+\d{1,4}$/,
+        required: [true, 'Country code is required & in this format +250'],
     },
     phoneNumber: {
         type: String,
-        unique: true,
         match: /^\d{8,10}$/,
+        required: [true, 'Phone number is required'],
+        unique: true,
     },
     password: {
         type: String,
-        minlength: [6, 'Minimum password length is 6 characters'],
+        required: [true, 'Password is required'],
+        minlength: [6, 'Password should be at least 6 characters long'],
     },
     varified: {
       type: String,

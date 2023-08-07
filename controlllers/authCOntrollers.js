@@ -8,11 +8,14 @@ const crypto = require('crypto');
 // handle errors
 const handleErrors = (err) => {
   console.log(err.message, err.code);
-  let errors = { email: '', password: '' };
+  let errors = { name: '', email: '', phoneNumber: '', password: '' };
 
-  // incorrect email
   if (err.message === 'incorrect email') {
     errors.email = 'That email is not registered';
+  }
+  
+  if(err.message === 'incorrect email'){
+    errors.email = 'That email is not registered'
   }
 
   // incorrect password
@@ -20,10 +23,9 @@ const handleErrors = (err) => {
     errors.password = 'That password is incorrect';
   }
 
-  // duplicate email error
+  // duplicate email or phoneNumber error
   if (err.code === 11000) {
-    errors.email = 'that email is already registered';
-    return errors;
+    errors.email = 'Email & phoneNumber must be unique';
   }
 
   // validation errors
@@ -52,32 +54,22 @@ module.exports.signup_get = (req, res) => {
 module.exports.login_get = (req, res) => {
   res.render('login');
 }
-
-// Generate a random token
-const generateToken = () => crypto.randomBytes(20).toString('hex');
 // Create a transporter for sending emails
 const transporter = nodemailer.createTransport({
   host: 'localhost',
   port: 1025, // This is the default port used by MailDev
   ignoreTLS: true,
 });
+const generateToken = () => crypto.randomBytes(20).toString('hex');
 
 module.exports.signup_post = async (req, res) => {
   const { name, email, countryCode, phoneNumber, password } = req.body;
 
   try {
-    // const user = await User.create({ name, email, countryCode, phoneNumber, password });
-    //Token creation----------------
-    // const NewToken = createToken(user._id);
-    // const token = await Token.create({ userId: user._id, token: NewToken });
-    // res.cookie('fAuth', token, { httpOnly: true, maxAge: 31536000000 });
-    // res.status(201).json({ user: user._id });
-    //--------------------------------
-
-    //Send mail
     const verificationToken = generateToken();
-    // const newUser = new User({ email, password, verificationToken });
-    // await newUser.save();
+
+    //Store in Database
+    const user = await User.create({ name, email, countryCode, phoneNumber, password });
 
     // Send the verification email
     const verificationLink = `http://localhost:3000/verify?token=${verificationToken}`;
@@ -88,7 +80,7 @@ module.exports.signup_post = async (req, res) => {
       text: `Click the link below to verify your account:\n${verificationLink}`,
     };
     await transporter.sendMail(mailOptions);
-    const user = await User.create({ name, email, countryCode, phoneNumber, password });
+    res.status(200).json({ message: 'User created successfully' });
   } 
   catch(err) {
     const errors = handleErrors(err);
