@@ -31,4 +31,4 @@ const verifymail = async(email, link) => {
     }
 }
 
-export default verifymail;
+module.exports = verifymail;

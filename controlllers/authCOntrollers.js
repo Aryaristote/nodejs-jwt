@@ -1,7 +1,9 @@
+require('dotenv').config();
 const User = require("../models/User");
-const Token = require("../models/Token");
+const nodemailer = require('nodemailer');
 const fAuth = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto'); 
 
 // handle errors
 const handleErrors = (err) => {
@@ -51,16 +53,43 @@ module.exports.login_get = (req, res) => {
   res.render('login');
 }
 
+// Generate a random token
+const generateToken = () => crypto.randomBytes(20).toString('hex');
+// Create a transporter for sending emails
+const transporter = nodemailer.createTransport({
+  host: 'localhost',
+  port: 1025, // This is the default port used by MailDev
+  ignoreTLS: true,
+});
+
 module.exports.signup_post = async (req, res) => {
   const { name, email, countryCode, phoneNumber, password } = req.body;
 
   try {
+    // const user = await User.create({ name, email, countryCode, phoneNumber, password });
+    //Token creation----------------
+    // const NewToken = createToken(user._id);
+    // const token = await Token.create({ userId: user._id, token: NewToken });
+    // res.cookie('fAuth', token, { httpOnly: true, maxAge: 31536000000 });
+    // res.status(201).json({ user: user._id });
+    //--------------------------------
+
+    //Send mail
+    const verificationToken = generateToken();
+    // const newUser = new User({ email, password, verificationToken });
+    // await newUser.save();
+
+    // Send the verification email
+    const verificationLink = `http://localhost:3000/verify?token=${verificationToken}`;
+    const mailOptions = {
+      from: 'aryaristote@gmail.com',
+      to: email,
+      subject: 'Account Verification',
+      text: `Click the link below to verify your account:\n${verificationLink}`,
+    };
+    await transporter.sendMail(mailOptions);
     const user = await User.create({ name, email, countryCode, phoneNumber, password });
-    const NewToken = createToken(user._id);
-    const token = await Token.create({ userId: user._id, token: NewToken });
-    res.cookie('fAuth', token, { httpOnly: true, maxAge: 31536000000 });
-    res.status(201).json({ user: user._id });
-  }
+  } 
   catch(err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
