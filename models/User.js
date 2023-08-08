@@ -18,12 +18,12 @@ const userSchema = new mongoose.Schema({
     countryCode: {
         type: String,
         match: /^\+\d{1,4}$/,
-        required: [true, 'Country code is required & in this format +250'],
+        // required: [true, 'Country code is required & in this format +250'],
     },
     phoneNumber: {
         type: String,
         match: /^\d{8,10}$/,
-        required: [true, 'Phone number is required'],
+        // required: [true, 'Phone number is required'],
         unique: true,
     },
     password: {
@@ -36,7 +36,6 @@ const userSchema = new mongoose.Schema({
       default: false,
     }
 });
-
 
 // fire a function before doc saved to db
 userSchema.pre('save', async function(next) {
