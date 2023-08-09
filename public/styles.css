@@ -83,6 +83,18 @@ button{
 button:hover{
   cursor: pointer;
 }
+<<<<<<< HEAD
+=======
+.sub{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.sub a{
+  margin-top: 30px;
+}
+>>>>>>> 53def720c109d533effa26370a9d128bb82dd856
 .error{
   color: #ff4d00;
   margin: 10px 2px;

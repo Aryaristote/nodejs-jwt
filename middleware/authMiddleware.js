@@ -15,6 +15,16 @@ const requireAuth = (req, res, next) => {
                 next();
             }
         });
+    }else if(gToken){
+        fAuth.verify(gToken, 'Bolingo@defaultpass', (err, decodedToken) => {
+            if(err){
+                console.log(err.message)
+                res.redirect('/login');
+            }else{
+                console.log(decodedToken)
+                next();
+            }
+        });
     }else{
         res.redirect('/login')
     }
@@ -22,11 +32,11 @@ const requireAuth = (req, res, next) => {
 
 //Check current user
 const checkUser = (req, res, next) => {  
-    const token = req.cookies.jwt;
+    const token = req.cookies.fAuth;
 
     //Checking if the web token exist & valide
     if(token){
-        jwt.verify(token, 'net ninja secret', async (err, decodedToken) => {
+        fAuth.verify(token, 'Bolingo@defaultpass', async (err, decodedToken) => {
             if(err){
                 console.log(err)
                 res.locals.user = null;

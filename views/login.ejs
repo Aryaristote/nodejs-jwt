@@ -3,7 +3,11 @@
 <form action="/signup">
   <h2>Login</h2>
   <label for="email">Email</label>
+<<<<<<< HEAD
   <input type="email" name="email"  />
+=======
+  <input type="text" name="emailOrPhone"  />
+>>>>>>> 53def720c109d533effa26370a9d128bb82dd856
   <div class="email error"></div>
   <label for="password">Password</label>
   <input type="password" name="password"  />
@@ -26,13 +30,21 @@
     passwordError.textContent = '';
 
     // get values
+<<<<<<< HEAD
     const email = form.email.value;
+=======
+    const emailOrPhone = form.emailOrPhone.value;
+>>>>>>> 53def720c109d533effa26370a9d128bb82dd856
     const password = form.password.value;
 
     try {
       const res = await fetch('/login', { 
         method: 'POST', 
+<<<<<<< HEAD
         body: JSON.stringify({ email, password }),
+=======
+        body: JSON.stringify({ emailOrPhone, password }),
+>>>>>>> 53def720c109d533effa26370a9d128bb82dd856
         headers: {'Content-Type': 'application/json'}
       });
       const data = await res.json();
