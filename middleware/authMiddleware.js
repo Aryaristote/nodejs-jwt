@@ -1,13 +1,12 @@
-const fAuth = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const requireAuth = (req, res, next) => {
-    const token = req.cookies.fAuth;
-    const gToken = req.cookies.authG;
+    const token = req.cookies.jwt;
 
-    //Checking if the web token exist & valide4554
+    //Checking if the web token exist & valide
     if(token){
-        fAuth.verify(token, 'Bolingo@defaultpass', (err, decodedToken) => {
+        jwt.verify(token, 'net ninja secret', (err, decodedToken) => {
             if(err){
                 console.log(err.message) 
                 res.redirect('/login');
